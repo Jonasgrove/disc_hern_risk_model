@@ -1,10 +1,17 @@
 #!/usr/bin/env python
 
+# disc hernia risk model
+# author Jonas grove
+# May 7, 2020
 
-
-#Problem 4
 import pandas as pd
 import numpy as np
+
+'''
+this function uses k nearest neighbors classification (sklearn)
+to predict a patients risk of disc hernia based on column3c 
+vertebrae data
+'''
 
 def atRisk(rows,k,path):
   import pandas as pd
@@ -16,21 +23,22 @@ def atRisk(rows,k,path):
   vert.iloc[:,6] = le.fit_transform(vert.iloc[:,6])
   vertY = vert.iloc[:,6]
 
-  #scale x data
+  # scale x data
   scaler = StandardScaler()
   columns_X = [list(vertX.columns)]
   for feature in columns_X:
       vertX[feature] = scaler.fit_transform(vertX[feature])
 
-  #break into test and train data
+  # break into test and train data
   Xtest,Ytest,Xtrain,Ytrain = getTestSet(rows,vertX,vertY)
-  print("Y test", Ytest)
+  
+  # fit model and run on test set
   from sklearn.neighbors import KNeighborsClassifier
   knn = KNeighborsClassifier(n_neighbors = k)
   knn.fit(Xtrain, Ytrain)
   riskProbs = knn.predict_proba(Xtest)
 
-  #createNewMatrix
+  # createNewMatrix consisting of predicicted risc status
   dsMatrix = pd.DataFrame(columns=['DH','SL'])
   i = 1
   for result in riskProbs:
@@ -52,6 +60,8 @@ def atRisk(rows,k,path):
   
   return dsMatrix
 
+# function which breaks data into train and test set 
+# for model development
 
 def getTestSet(rows,XvertData,YvertData):
   import random
@@ -68,7 +78,3 @@ def getTestSet(rows,XvertData,YvertData):
 
   return Xtest,Ytest,XvertData,YvertData
 
-my_path = '/content/drive/My Drive/Spring 20/ECS 171 ML/column_3C.dat'
-rows = 15
-print()
-atRisk(rows,5,my_path)
